@@ -54,6 +54,7 @@ void ll_clear(ll_t *list, void (*unload_fun)(void *))
 void ll_delete_at(ll_t *list, size_t index, void (*unload_fun)(void *))
 {
     assert(list != NULL);
+    assert(list->head != NULL);
     assert(index < list->length);
 
     ll_node_t *ptr = list->head;
@@ -81,6 +82,7 @@ void ll_delete_at(ll_t *list, size_t index, void (*unload_fun)(void *))
 size_t ll_get_index(const ll_t *list, const void *item, int (*cmp_fun)(const void *, const void *))
 {
     assert(list != NULL);
+    assert(list->head != NULL);
     assert(item != NULL);
 
     size_t index = 0;
@@ -227,7 +229,9 @@ void ll_insert_block_at(ll_t *list, size_t index, void (*load_fun)(const void *,
 void *ll_get_at(const ll_t *list, size_t index)
 {
     assert(list != NULL);
+    assert(list->head != NULL);
     assert(index < list->length);
+
     ll_node_t *ptr = list->head;
 
     while (index--)
@@ -240,6 +244,7 @@ void *ll_get_at(const ll_t *list, size_t index)
 void ll_replace_at(ll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
 {
     assert(list != NULL);
+    assert(list->head != NULL);
     assert(index < list->length);
 
     ll_node_t *ptr = list->head;

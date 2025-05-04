@@ -1,5 +1,5 @@
-#ifndef __SINGLE_LL__
-#define __SINGLE_LL__
+#ifndef __SINGLY_LL__
+#define __SINGLY_LL__
 
 typedef struct _ll_node_t
 {
@@ -27,4 +27,4 @@ void ll_replace_at(ll_t *list, size_t index, const void *item, void (*unload_fun
 size_t ll_size(const ll_t *list);
 void ll_print(const ll_t *list, void (*print_func)(const void *));
 
-#endif /* __SINGLE_LL__ */
+#endif /* __SINGLY_LL__ */

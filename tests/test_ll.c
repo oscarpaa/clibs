@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "common.h"
 #include "ll.h"
 
 typedef struct _token_t
@@ -10,39 +11,11 @@ typedef struct _token_t
     size_t type;
 } token_t;
 
-// PRINTS
-
-void print_int(const void *item)
-{
-    printf("%d", *(int *)item);
-}
-
-void print_ch(const void *item)
-{
-    printf("%s", (char *)item);
-}
-
 void print_tok(const void *item)
 {
     printf("{%s, ", ((token_t *)item)->name);
     printf("%d, ", ((token_t *)item)->index);
     printf("%d}", ((token_t *)item)->type);
-}
-
-// LOADS
-
-void load_int(const void *item, void **new_item)
-{
-    size_t len = sizeof(int);
-    *new_item = malloc(len);
-    memcpy(*new_item, item, len);
-}
-
-void load_ch(const void *item, void **new_item)
-{
-    size_t len = strlen((char *)item) + 1;
-    *new_item = malloc(len);
-    memcpy(*new_item, item, len);
 }
 
 void load_tok(const void *item, void **new_item)
@@ -57,29 +30,10 @@ void load_tok(const void *item, void **new_item)
     memcpy(*new_item, item, len);
 }
 
-// UNLOADS
-
-void unload(void *item)
-{
-    free(item);
-}
-
 void unload_tok(void *item)
 {
     free(((token_t *)item)->name);
     free(item);
-}
-
-// COMPARES
-
-int compare_int(const void *item1, const void *item2)
-{
-    return *(int *)item1 == *(int *)item2 ? 0 : 1;
-}
-
-int compare_ch(const void *item1, const void *item2)
-{
-    return strcmp(item1, item2);
 }
 
 // TESTS
@@ -164,14 +118,6 @@ int main(int argc, char const *argv[])
     test1(&list1);
     test2(&list2);
     test3(&list3);
-
-    printf("\n=====================\n");
-
-    ll_print(list1, print_int);
-    ll_print(list2, print_ch);
-    ll_print(list3, print_tok);
-
-    printf("=====================\n");
 
     ll_clear(list1, unload);
     ll_clear(list2, unload);
