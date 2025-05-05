@@ -61,6 +61,8 @@ void cll_delete_at(cll_t *list, size_t index, void (*unload_fun)(void *))
     cll_node_t *head;
     cll_node_t *prev;
 
+    size_t i = index;
+
     if (!index)
     {
         head = ptr->next;
@@ -76,6 +78,10 @@ void cll_delete_at(cll_t *list, size_t index, void (*unload_fun)(void *))
             ptr = ptr->next;
         }
         prev->next = ptr->next;
+        if (i == list->length - 1)
+        {
+            list->tail = prev;
+        }
     }
     unload_fun(ptr->item);
     free(ptr);
@@ -126,7 +132,7 @@ void cll_append_front(cll_t *list, const void *item, void (*load_fun)(const void
     cll_node_t *head;
     cll_node_t *new = cll_create_node(item, load_fun);
 
-    if (ptr != NULL)
+    if (ptr == NULL)
     {
         new->next = new;
         list->tail = new;
@@ -226,7 +232,7 @@ void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void 
     for (size_t i = 0; i < count - 1; i++)
     {
         item = va_arg(ap, void *);
-        new = ll_create_node(item, load_fun);
+        new = cll_create_node(item, load_fun);
         prev->next = new;
         prev = new;
     }
@@ -244,8 +250,9 @@ void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void 
     }
     else if (index == list->length)
     {
-        list->tail = tail;
+        tail->next = ptr->next;
         ptr->next = head;
+        list->tail = tail;
     }
     else
     {
@@ -275,7 +282,6 @@ void *cll_get_at(const cll_t *list, size_t index)
         return ptr->item;
     }
 
-    index--;
     ptr = ptr->next;
     while (index--)
     {
@@ -297,12 +303,17 @@ void cll_replace_at(cll_t *list, size_t index, const void *item, void (*unload_f
 
     if (!index)
     {
+        ptr->next = new;
         ptr = head;
         new->next = ptr->next;
     }
     else
     {
         ptr = head;
+        if (index == list->length - 1)
+        {
+            list->tail = new;
+        }
         while (index--)
         {
             prev = ptr;
@@ -337,7 +348,7 @@ void cll_print(const cll_t *list, void (*print_func)(const void *))
     for (size_t i = 0; i < list->length; i++)
     {
         print_func(ptr->item);
-        if (ptr->next != NULL)
+        if (i < list->length - 1)
         {
             printf(", ");
         }

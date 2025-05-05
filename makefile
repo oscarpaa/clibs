@@ -3,17 +3,18 @@ LIBS=libs
 INC=$(LIBS)/inc
 CFLAGS=-Wall -I$(INC)
 
-all: tests
+all: test_ll test_cll
 
-tests: test_ll
-
-$(LIBS)/%.o: $(LIBS)/%.c $(INC)/%.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+test_ll: test_ll
+test_cll: test_cll
 
 tests/%.o: tests/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-test_ll: tests/test_ll.o $(LIBS)/ll.o
+$(LIBS)/%.o: $(LIBS)/%.c $(INC)/%.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+test_%: tests/test_%.o $(LIBS)/%.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:

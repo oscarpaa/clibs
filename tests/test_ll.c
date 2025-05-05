@@ -86,7 +86,7 @@ void test2(ll_t **list2)
     ll_delete_at(*list2, 0, unload);
     ll_print(*list2, print_ch);
 
-    ll_replace_at(*list2, 0, "KEWW", unload, load_ch);
+    ll_replace_at(*list2, 2, "KEWW", unload, load_ch);
     ll_print(*list2, print_ch);
 
     ll_insert_block_at(*list2, 2, load_ch, 3, "esto", "es", "dificil");
