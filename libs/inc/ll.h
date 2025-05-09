@@ -21,7 +21,9 @@ size_t ll_get_index(const ll_t *list, const void *item, int (*cmp_fun)(const voi
 void ll_append_front(ll_t *list, const void *item, void (*load_fun)(const void *, void **));
 void ll_append_back(ll_t *list, const void *item, void (*load_fun)(const void *, void **));
 void ll_insert_at(ll_t *list, const void *item, size_t index, void (*load_fun)(const void *, void **));
+void ll_insert_array_at(ll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, void *arr_items[]);
 void ll_insert_block_at(ll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, ...);
+ll_node_t *ll_get_node_at(const ll_t *list, size_t index, ll_node_t **prev);
 void *ll_get_at(const ll_t *list, size_t index);
 void ll_replace_at(ll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **));
 size_t ll_size(const ll_t *list);

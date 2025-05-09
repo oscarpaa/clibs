@@ -58,25 +58,19 @@ void cll_delete_at(cll_t *list, size_t index, void (*unload_fun)(void *))
     assert(index < list->length);
 
     cll_node_t *ptr = list->tail;
-    cll_node_t *head;
+    cll_node_t *head = ptr->next;
     cll_node_t *prev;
 
     size_t i = index;
 
     if (!index)
     {
-        head = ptr->next;
         ptr->next = head->next;
         ptr = head;
     }
     else
     {
-        ptr = ptr->next;
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = cll_get_node_at(list, index, &prev);
         prev->next = ptr->next;
         if (i == list->length - 1)
         {
@@ -120,7 +114,6 @@ size_t cll_get_index(const cll_t *list, const void *item, int (*cmp_fun)(const v
         ptr = ptr->next;
         i++;
     }
-
     return index;
 }
 
@@ -197,16 +190,64 @@ void cll_insert_at(cll_t *list, const void *item, size_t index, void (*load_fun)
     }
     else
     {
-        ptr = ptr->next;
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = cll_get_node_at(list, index, &prev);
         prev->next = new;
         new->next = ptr;
     }
     list->length++;
+}
+
+void cll_insert_array_at(cll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, void *arr_items[])
+{
+    assert(list != NULL);
+    assert(index <= list->length);
+    assert(arr_items != NULL);
+    assert(count);
+
+    cll_node_t *ptr = list->tail;
+    cll_node_t *prev;
+    cll_node_t *new;
+
+    cll_node_t *tail;
+    cll_node_t *head;
+
+    void *item = arr_items[0];
+    new = cll_create_node(item, load_fun);
+    prev = new;
+    head = new;
+    for (size_t i = 1; i < count; i++)
+    {
+        item = arr_items[i];
+        new = cll_create_node(item, load_fun);
+        prev->next = new;
+        prev = new;
+    }
+    tail = new;
+
+    if (ptr == NULL)
+    {
+        list->tail = tail;
+        tail->next = head;
+    }
+    else if (!index)
+    {
+        tail->next = ptr->next;
+        ptr->next = head;
+    }
+    else if (index == list->length)
+    {
+        tail->next = ptr->next;
+        ptr->next = head;
+        list->tail = tail;
+    }
+    else
+    {
+        ptr = cll_get_node_at(list, index, &prev);
+        prev->next = head;
+        tail->next = ptr;
+    }
+
+    list->length += count;
 }
 
 void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, ...)
@@ -229,7 +270,7 @@ void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void 
     new = cll_create_node(item, load_fun);
     prev = new;
     head = new;
-    for (size_t i = 0; i < count - 1; i++)
+    for (size_t i = 1; i < count; i++)
     {
         item = va_arg(ap, void *);
         new = cll_create_node(item, load_fun);
@@ -256,12 +297,7 @@ void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void 
     }
     else
     {
-        ptr = ptr->next;
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = cll_get_node_at(list, index, &prev);
         prev->next = head;
         tail->next = ptr;
     }
@@ -270,23 +306,38 @@ void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void 
     va_end(ap);
 }
 
-void *cll_get_at(const cll_t *list, size_t index)
+cll_node_t *cll_get_node_at(const cll_t *list, size_t index, cll_node_t **prev)
 {
     assert(list != NULL);
     assert(list->tail != NULL);
     assert(index < list->length);
 
     cll_node_t *ptr = list->tail;
+
     if (index == list->length - 1)
     {
-        return ptr->item;
+        return ptr;
     }
 
     ptr = ptr->next;
     while (index--)
     {
+        if (prev != NULL)
+        {
+            *prev = ptr;
+        }
         ptr = ptr->next;
     }
+    return ptr;
+}
+
+void *cll_get_at(const cll_t *list, size_t index)
+{
+    assert(list != NULL);
+    assert(list->tail != NULL);
+    assert(index < list->length);
+
+    cll_node_t *ptr = cll_get_node_at(list, index, NULL);
     return ptr->item;
 }
 
@@ -309,16 +360,11 @@ void cll_replace_at(cll_t *list, size_t index, const void *item, void (*unload_f
     }
     else
     {
-        ptr = head;
         if (index == list->length - 1)
         {
             list->tail = new;
         }
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = cll_get_node_at(list, index, &prev);
         prev->next = new;
         new->next = ptr->next;
     }

@@ -78,6 +78,12 @@ void test2(ll_t **list2)
 
     ll_append_back(*list2, "hola", load_ch);
     ll_append_back(*list2, "mundo", load_ch);
+
+    char *m[10] = {"This", "is", "a", "test"};
+
+    ll_insert_array_at(*list2, 1, load_ch, 4, (void **)m);
+    ll_print(*list2, print_ch);
+
     ll_append_front(*list2, "ahhhhh", load_ch);
     ll_insert_at(*list2, "!!!!", 0, load_ch);
 

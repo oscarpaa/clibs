@@ -78,6 +78,12 @@ void test2(cll_t **list2)
 
     cll_append_back(*list2, "hola", load_ch);
     cll_append_back(*list2, "mundo", load_ch);
+
+    char *m[10] = {"This", "is", "a", "test"};
+
+    cll_insert_array_at(*list2, 1, load_ch, 4, (void **)m);
+    cll_print(*list2, print_ch);
+
     cll_append_front(*list2, "ahhhhh", load_ch);
     cll_insert_at(*list2, "!!!!", 0, load_ch);
 

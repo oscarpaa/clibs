@@ -66,11 +66,7 @@ void ll_delete_at(ll_t *list, size_t index, void (*unload_fun)(void *))
     }
     else
     {
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = ll_get_node_at(list, index, &prev);
         prev->next = ptr->next;
     }
     unload_fun(ptr->item);
@@ -102,7 +98,6 @@ size_t ll_get_index(const ll_t *list, const void *item, int (*cmp_fun)(const voi
         }
         ptr = ptr->next;
     }
-
     return index;
 }
 
@@ -162,15 +157,57 @@ void ll_insert_at(ll_t *list, const void *item, size_t index, void (*load_fun)(c
     }
     else
     {
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = ll_get_node_at(list, index, &prev);
         prev->next = new;
         new->next = ptr;
     }
     list->length++;
+}
+
+void ll_insert_array_at(ll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, void *arr_items[])
+{
+    assert(list != NULL);
+    assert(index <= list->length);
+    assert(arr_items != NULL);
+    assert(count);
+
+    ll_node_t *ptr = list->head;
+    ll_node_t *prev;
+    ll_node_t *new;
+
+    ll_node_t *tail;
+    ll_node_t *head;
+
+    void *item = arr_items[0];
+    new = ll_create_node(item, load_fun);
+    prev = new;
+    head = new;
+    for (size_t i = 1; i < count; i++)
+    {
+        item = arr_items[i];
+        new = ll_create_node(item, load_fun);
+        prev->next = new;
+        prev = new;
+    }
+    tail = new;
+
+    if (ptr == NULL)
+    {
+        list->head = head;
+    }
+    else if (!index)
+    {
+        list->head = head;
+        tail->next = ptr;
+    }
+    else
+    {
+        ptr = ll_get_node_at(list, index, &prev);
+        prev->next = head;
+        tail->next = ptr;
+    }
+
+    list->length += count;
 }
 
 void ll_insert_block_at(ll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, ...)
@@ -193,7 +230,7 @@ void ll_insert_block_at(ll_t *list, size_t index, void (*load_fun)(const void *,
     new = ll_create_node(item, load_fun);
     prev = new;
     head = new;
-    for (size_t i = 0; i < count - 1; i++)
+    for (size_t i = 1; i < count; i++)
     {
         item = va_arg(ap, void *);
         new = ll_create_node(item, load_fun);
@@ -213,11 +250,7 @@ void ll_insert_block_at(ll_t *list, size_t index, void (*load_fun)(const void *,
     }
     else
     {
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = ll_get_node_at(list, index, &prev);
         prev->next = head;
         tail->next = ptr;
     }
@@ -226,7 +259,7 @@ void ll_insert_block_at(ll_t *list, size_t index, void (*load_fun)(const void *,
     va_end(ap);
 }
 
-void *ll_get_at(const ll_t *list, size_t index)
+ll_node_t *ll_get_node_at(const ll_t *list, size_t index, ll_node_t **prev)
 {
     assert(list != NULL);
     assert(list->head != NULL);
@@ -236,8 +269,22 @@ void *ll_get_at(const ll_t *list, size_t index)
 
     while (index--)
     {
+        if (prev != NULL)
+        {
+            *prev = ptr;
+        }
         ptr = ptr->next;
     }
+    return ptr;
+}
+
+void *ll_get_at(const ll_t *list, size_t index)
+{
+    assert(list != NULL);
+    assert(list->head != NULL);
+    assert(index < list->length);
+
+    ll_node_t *ptr = ll_get_node_at(list, index, NULL);
     return ptr->item;
 }
 
@@ -258,11 +305,7 @@ void ll_replace_at(ll_t *list, size_t index, const void *item, void (*unload_fun
     }
     else
     {
-        while (index--)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
+        ptr = ll_get_node_at(list, index, &prev);
         prev->next = new;
         new->next = ptr->next;
     }

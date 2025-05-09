@@ -21,7 +21,9 @@ size_t cll_get_index(const cll_t *list, const void *item, int (*cmp_fun)(const v
 void cll_append_front(cll_t *list, const void *item, void (*load_fun)(const void *, void **));
 void cll_append_back(cll_t *list, const void *item, void (*load_fun)(const void *, void **));
 void cll_insert_at(cll_t *list, const void *item, size_t index, void (*load_fun)(const void *, void **));
+void cll_insert_array_at(cll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, void *arr_items[]);
 void cll_insert_block_at(cll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, ...);
+cll_node_t *cll_get_node_at(const cll_t *list, size_t index, cll_node_t **prev);
 void *cll_get_at(const cll_t *list, size_t index);
 void cll_replace_at(cll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **));
 size_t cll_size(const cll_t *list);
