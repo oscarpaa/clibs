@@ -263,7 +263,7 @@ ll_node_t *ll_get_node_at(const ll_t *list, size_t index, ll_node_t **prev)
 {
     assert(list != NULL);
     assert(list->head != NULL);
-    assert(index < list->length);
+    assert(index <= list->length);
 
     ll_node_t *ptr = list->head;
 
@@ -288,29 +288,43 @@ void *ll_get_at(const ll_t *list, size_t index)
     return ptr->item;
 }
 
-void ll_replace_at(ll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
+void ll_set_at(ll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
 {
     assert(list != NULL);
-    assert(list->head != NULL);
-    assert(index < list->length);
+    assert(index <= list->length);
 
     ll_node_t *ptr = list->head;
     ll_node_t *prev;
     ll_node_t *new = ll_create_node(item, load_fun);
 
-    if (!index)
+    if (ptr == NULL)
     {
         list->head = new;
-        new->next = ptr->next;
+        list->length++;
     }
-    else
+    else if (index == list->length)
     {
         ptr = ll_get_node_at(list, index, &prev);
         prev->next = new;
-        new->next = ptr->next;
+        new->next = ptr;
+        list->length++;
     }
-    unload_fun(ptr->item);
-    free(ptr);
+    else
+    {
+        if (!index)
+        {
+            list->head = new;
+            new->next = ptr->next;
+        }
+        else
+        {
+            ptr = ll_get_node_at(list, index, &prev);
+            prev->next = new;
+            new->next = ptr->next;
+        }
+        unload_fun(ptr->item);
+        free(ptr);
+    }
 }
 
 size_t ll_size(const ll_t *list)

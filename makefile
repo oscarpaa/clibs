@@ -3,8 +3,9 @@ LIBS=libs
 INC=$(LIBS)/inc
 CFLAGS=-Wall -I$(INC)
 
-all: test_ll test_cll test_cdll
+all: test_ll test_cll test_cdll test_da
 
+test_da: test_da
 test_ll: test_ll
 test_cll: test_cll
 test_cdll: test_cdll

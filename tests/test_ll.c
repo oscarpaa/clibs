@@ -4,45 +4,14 @@
 #include "common.h"
 #include "ll.h"
 
-typedef struct _token_t
-{
-    char *name;
-    size_t index;
-    size_t type;
-} token_t;
-
-void print_tok(const void *item)
-{
-    printf("{%s, ", ((token_t *)item)->name);
-    printf("%d, ", ((token_t *)item)->index);
-    printf("%d}", ((token_t *)item)->type);
-}
-
-void load_tok(const void *item, void **new_item)
-{
-    size_t len = sizeof(token_t);
-    size_t len_n = strlen(((token_t *)item)->name) + 1;
-
-    *new_item = malloc(len);
-    memcpy(*new_item, item, len);
-
-    ((token_t *)*new_item)->name = malloc(len_n);
-    memcpy(*new_item, item, len);
-}
-
-void unload_tok(void *item)
-{
-    free(((token_t *)item)->name);
-    free(item);
-}
-
-// TESTS
-
 void test1(ll_t **list1)
 {
     printf("====== TEST 1 ======\n");
 
     ll_append_front(*list1, &(int){67}, load_int);
+    ll_print(*list1, print_int);
+
+    ll_insert_at(*list1, &(int){129}, 1, load_int);
     ll_print(*list1, print_int);
 
     ll_append_back(*list1, &(int){1}, load_int);
@@ -68,7 +37,7 @@ void test1(ll_t **list1)
 
     printf("Index: %d\n", ll_get_index(*list1, &(int){12}, compare_int));
 
-    ll_replace_at(*list1, 1, &(int){555}, unload, load_int);
+    ll_set_at(*list1, 1, &(int){555}, unload, load_int);
     ll_print(*list1, print_int);
 }
 
@@ -92,7 +61,7 @@ void test2(ll_t **list2)
     ll_delete_at(*list2, 0, unload);
     ll_print(*list2, print_ch);
 
-    ll_replace_at(*list2, 2, "KEWW", unload, load_ch);
+    ll_set_at(*list2, 2, "KEWW", unload, load_ch);
     ll_print(*list2, print_ch);
 
     ll_insert_block_at(*list2, 2, load_ch, 3, "esto", "es", "dificil");
@@ -105,9 +74,17 @@ void test3(ll_t **list3)
 {
     printf("====== TEST 3 ======\n");
 
+    ll_set_at(*list3, 0, &(token_t){"siuu", 10, 0}, unload_tok, load_tok);
+    ll_print(*list3, print_tok);
+
     ll_append_back(*list3, &(token_t){"HOLA", 1, 2}, load_tok);
     ll_append_back(*list3, &(token_t){"mundo", 4, 2}, load_tok);
+    ll_print(*list3, print_tok);
 
+    ll_set_at(*list3, 1, &(token_t){"meme", 10, 0}, unload_tok, load_tok);
+    ll_print(*list3, print_tok);
+
+    ll_set_at(*list3, 3, &(token_t){"five", 2, 7}, unload_tok, load_tok);
     ll_print(*list3, print_tok);
 }
 
@@ -132,6 +109,8 @@ int main(int argc, char const *argv[])
     ll_destroy(&list1);
     ll_destroy(&list2);
     ll_destroy(&list3);
+
+    printf("\nExiting...\n");
 
     return 0;
 }

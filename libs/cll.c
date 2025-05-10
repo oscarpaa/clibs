@@ -310,11 +310,11 @@ cll_node_t *cll_get_node_at(const cll_t *list, size_t index, cll_node_t **prev)
 {
     assert(list != NULL);
     assert(list->tail != NULL);
-    assert(index < list->length);
+    assert(index <= list->length);
 
     cll_node_t *ptr = list->tail;
 
-    if (index == list->length - 1)
+    if (index == list->length - 1 && prev == NULL)
     {
         return ptr;
     }
@@ -341,35 +341,52 @@ void *cll_get_at(const cll_t *list, size_t index)
     return ptr->item;
 }
 
-void cll_replace_at(cll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
+void cll_set_at(cll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
 {
     assert(list != NULL);
-    assert(list->tail != NULL);
-    assert(index < list->length);
+    assert(index <= list->length);
 
     cll_node_t *ptr = list->tail;
-    cll_node_t *head = ptr->next;
+    cll_node_t *head;
     cll_node_t *prev;
     cll_node_t *new = cll_create_node(item, load_fun);
 
-    if (!index)
+    if (ptr == NULL)
     {
+        list->tail = new;
+        new->next = new;
+        list->length++;
+    }
+    else if (index == list->length)
+    {
+        head = ptr->next;
+        new->next = head;
         ptr->next = new;
-        ptr = head;
-        new->next = ptr->next;
+        list->tail = new;
+        list->length++;
     }
     else
     {
-        if (index == list->length - 1)
+        if (!index)
         {
-            list->tail = new;
+            head = ptr->next;
+            ptr->next = new;
+            new->next = head->next;
+            ptr = head;
         }
-        ptr = cll_get_node_at(list, index, &prev);
-        prev->next = new;
-        new->next = ptr->next;
+        else
+        {
+            if (index == list->length - 1)
+            {
+                list->tail = new;
+            }
+            ptr = cll_get_node_at(list, index, &prev);
+            prev->next = new;
+            new->next = ptr->next;
+        }
+        unload_fun(ptr->item);
+        free(ptr);
     }
-    unload_fun(ptr->item);
-    free(ptr);
 }
 
 size_t cll_size(const cll_t *list)

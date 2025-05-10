@@ -351,7 +351,7 @@ cdll_node_t *cdll_get_node_at(const cdll_t *list, size_t index)
 {
     assert(list != NULL);
     assert(list->head != NULL);
-    assert(index < list->length);
+    assert(index <= list->length);
 
     cdll_node_t *phead = list->head;
     cdll_node_t *ptail = phead->prev;
@@ -385,47 +385,66 @@ void *cdll_get_at(const cdll_t *list, size_t index)
     return ptr->item;
 }
 
-void cdll_replace_at(cdll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
+void cdll_set_at(cdll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **))
 {
     assert(list != NULL);
-    assert(list->head != NULL);
-    assert(index < list->length);
+    assert(index <= list->length);
 
     cdll_node_t *ptr = list->head;
-    cdll_node_t *tail = ptr->prev;
+    cdll_node_t *tail;
     cdll_node_t *prev;
     cdll_node_t *next;
     cdll_node_t *new = cdll_create_node(item, load_fun);
 
-    if (!index)
+    if (ptr == NULL)
     {
-        next = ptr->next;
+        new->prev = new;
+        new->next = new;
+        list->head = new;
+        list->length++;
+    }
+    else if (index == list->length)
+    {
+        tail = ptr->prev;
         tail->next = new;
         new->prev = tail;
-        new->next = next;
-        next->prev = new;
-        list->head = new;
-    }
-    else if (index == list->length - 1)
-    {
-        ptr = tail;
-        prev = tail->prev;
-        prev->next = new;
-        new->prev = prev;
-        new->next = list->head;
+        new->next = ptr;
+        ptr->prev = new;
+        list->length++;
     }
     else
     {
-        ptr = cdll_get_node_at(list, index);
-        next = ptr->next;
-        prev = ptr->prev;
-        prev->next = new;
-        new->prev = prev;
-        new->next = next;
-        next->prev = new;
+        tail = ptr->prev;
+        if (!index)
+        {
+            next = ptr->next;
+            tail->next = new;
+            new->prev = tail;
+            new->next = next;
+            next->prev = new;
+            list->head = new;
+        }
+        else if (index == list->length - 1)
+        {
+            ptr = tail;
+            prev = tail->prev;
+            prev->next = new;
+            new->prev = prev;
+            new->next = list->head;
+        }
+        else
+        {
+            ptr = cdll_get_node_at(list, index);
+            next = ptr->next;
+            prev = ptr->prev;
+            prev->next = new;
+            new->prev = prev;
+            new->next = next;
+            next->prev = new;
+        }
+        unload_fun(ptr->item);
+        free(ptr);
     }
-    unload_fun(ptr->item);
-    free(ptr);
 }
 
 size_t cdll_size(const cdll_t *list)

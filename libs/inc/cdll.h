@@ -26,7 +26,7 @@ void cdll_insert_array_at(cdll_t *list, size_t index, void (*load_fun)(const voi
 void cdll_insert_block_at(cdll_t *list, size_t index, void (*load_fun)(const void *, void **), size_t count, ...);
 cdll_node_t *cdll_get_node_at(const cdll_t *list, size_t index);
 void *cdll_get_at(const cdll_t *list, size_t index);
-void cdll_replace_at(cdll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **));
+void cdll_set_at(cdll_t *list, size_t index, const void *item, void (*unload_fun)(void *), void (*load_fun)(const void *, void **));
 size_t cdll_size(const cdll_t *list);
 void cdll_print(const cdll_t *list, void (*print_func)(const void *));
 
