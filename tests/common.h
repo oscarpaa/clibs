@@ -21,35 +21,39 @@ void print_int(const void *item)
 
 void print_c(const void *item)
 {
-    printf("%c", *(char *)item);
+    printf("\'%c\'", *(char *)item);
 }
 
 void print_ch(const void *item)
 {
-    printf("%s", (char *)item);
+    printf("\"%s\"", (char *)item);
 }
 
 void print_tok(const void *item)
 {
-    printf("{%s, ", ((token_t *)item)->name);
+    printf("{\"%s\", ", ((token_t *)item)->name);
     printf("%d, ", ((token_t *)item)->index);
     printf("%d}", ((token_t *)item)->type);
 }
 
 // LOADS
 
+void macpy(size_t len, const void *item, void **new_item)
+{
+    *new_item = malloc(len);
+    memcpy(*new_item, item, len);
+}
+
 void load_int(const void *item, void **new_item)
 {
     size_t len = sizeof(int);
-    *new_item = malloc(len);
-    memcpy(*new_item, item, len);
+    macpy(len, item, new_item);
 }
 
 void load_ch(const void *item, void **new_item)
 {
     size_t len = strlen((char *)item) + 1;
-    *new_item = malloc(len);
-    memcpy(*new_item, item, len);
+    macpy(len, item, new_item);
 }
 
 void load_tok(const void *item, void **new_item)
@@ -58,9 +62,8 @@ void load_tok(const void *item, void **new_item)
     size_t len_n = strlen(((token_t *)item)->name) + 1;
 
     *new_item = malloc(len);
-    memcpy(*new_item, item, len);
-
     ((token_t *)*new_item)->name = malloc(len_n);
+
     memcpy(*new_item, item, len);
 }
 

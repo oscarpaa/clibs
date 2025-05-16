@@ -28,6 +28,7 @@ void cdll_create(cdll_t **list)
 void cdll_destroy(cdll_t **list)
 {
     assert(*list != NULL);
+    assert(!(**list).length);
 
     free(*list);
     *list = NULL;
@@ -104,8 +105,7 @@ size_t cdll_get_index(const cdll_t *list, const void *item, int (*cmp_fun)(const
 
     int find = 0;
     size_t index = 0;
-    size_t i = 0;
-    while (i < list->length - 1 && !find)
+    while (index < list->length && !find)
     {
         if (!cmp_fun(item, ptr->item))
         {
@@ -116,7 +116,6 @@ size_t cdll_get_index(const cdll_t *list, const void *item, int (*cmp_fun)(const
             index++;
         }
         ptr = ptr->next;
-        i++;
     }
     return index;
 }

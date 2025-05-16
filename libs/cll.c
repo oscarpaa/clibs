@@ -27,6 +27,7 @@ void cll_create(cll_t **list)
 void cll_destroy(cll_t **list)
 {
     assert(*list != NULL);
+    assert(!(**list).length);
 
     free(*list);
     *list = NULL;
@@ -93,7 +94,6 @@ size_t cll_get_index(const cll_t *list, const void *item, int (*cmp_fun)(const v
 
     int find = 0;
     size_t index = 0;
-    size_t i = 0;
 
     if (!cmp_fun(item, ptr->item))
     {
@@ -101,7 +101,7 @@ size_t cll_get_index(const cll_t *list, const void *item, int (*cmp_fun)(const v
         index = list->length - 1;
     }
     ptr = ptr->next;
-    while (i < list->length - 1 && !find)
+    while (index < list->length && !find)
     {
         if (!cmp_fun(item, ptr->item))
         {
@@ -112,7 +112,6 @@ size_t cll_get_index(const cll_t *list, const void *item, int (*cmp_fun)(const v
             index++;
         }
         ptr = ptr->next;
-        i++;
     }
     return index;
 }

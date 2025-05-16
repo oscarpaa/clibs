@@ -27,6 +27,7 @@ void ll_create(ll_t **list)
 void ll_destroy(ll_t **list)
 {
     assert(*list != NULL);
+    assert(!(**list).length);
 
     free(*list);
     *list = NULL;
@@ -81,11 +82,9 @@ size_t ll_get_index(const ll_t *list, const void *item, int (*cmp_fun)(const voi
     assert(list->head != NULL);
     assert(item != NULL);
 
-    size_t index = 0;
     int find = 0;
-
+    size_t index = 0;
     ll_node_t *ptr = list->head;
-
     while (ptr != NULL && !find)
     {
         if (!cmp_fun(item, ptr->item))
