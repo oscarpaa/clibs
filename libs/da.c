@@ -5,6 +5,21 @@
 #include <assert.h>
 #include "da.h"
 
+static void da_reserve(da_t *arr, size_t expected)
+{
+    assert(arr != NULL);
+    assert(expected);
+
+    if (expected > arr->capacity)
+    {
+        while (expected > arr->capacity)
+        {
+            arr->capacity *= 2;
+        }
+        arr->items = realloc(arr->items, arr->capacity * sizeof(void *));
+    }
+}
+
 void da_create(da_t **arr, size_t init_cap)
 {
     assert(*arr == NULL);
@@ -26,7 +41,6 @@ void da_destroy(da_t **arr)
     free((**arr).items);
     free(*arr);
     *arr = NULL;
-    
 }
 
 void da_clear(da_t *arr, void (*unload_fun)(void *))
@@ -41,12 +55,18 @@ void da_clear(da_t *arr, void (*unload_fun)(void *))
     arr->length = 0;
 }
 
-void da_delete(da_t *arr, void (*unload_fun)(void *))
+void da_delete_at(da_t *arr, size_t index, void (*unload_fun)(void *))
 {
     assert(arr != NULL);
-    assert(arr->length);
+    assert(index < arr->length);
 
-    unload_fun(arr->items[--arr->length]);
+    unload_fun(arr->items[index]);
+    arr->length--;
+
+    for (size_t i = index; i < arr->length; i++)
+    {
+        arr->items[i] = arr->items[i + 1];
+    }
 }
 
 size_t da_get_index(const da_t *arr, const void *item, int (*cmp_fun)(const void *, const void *))
@@ -75,11 +95,8 @@ void da_append(da_t *arr, const void *item, void (*load_fun)(const void *, void 
     assert(arr != NULL);
     assert(item != NULL);
 
-    if (arr->length == arr->capacity)
-    {
-        arr->capacity *= 2;
-        arr->items = realloc(arr->items, arr->capacity * sizeof(void *));
-    }
+    da_reserve(arr, arr->length + 1);
+
     load_fun(item, &arr->items[arr->length]);
     arr->length++;
 }
@@ -90,10 +107,13 @@ void da_append_array(da_t *arr, void (*load_fun)(const void *, void **), size_t 
     assert(arr_items != NULL);
     assert(count);
 
+    da_reserve(arr, arr->length + count + 1);
+
     for (size_t i = 0; i < count; i++)
     {
-        da_append(arr, arr_items[i], load_fun);
+        load_fun(arr_items[i], &arr->items[i + arr->length]);
     }
+    arr->length += count;
 }
 
 void da_append_block(da_t *arr, void (*load_fun)(const void *, void **), size_t count, ...)
@@ -104,13 +124,81 @@ void da_append_block(da_t *arr, void (*load_fun)(const void *, void **), size_t 
     va_list ap;
     va_start(ap, count);
 
+    da_reserve(arr, arr->length + count + 1);
+
     void *item;
+    for (size_t i = 0; i < count; i++)
+    {
+        item = va_arg(ap, void *);
+        load_fun(item, &arr->items[i + arr->length]);
+    }
+    arr->length += count;
+
+    va_end(ap);
+}
+
+void da_insert_at(da_t *arr, const void *item, size_t index, void (*load_fun)(const void *, void **))
+{
+    assert(arr != NULL);
+    assert(item != NULL);
+    assert(index <= arr->length);
+
+    da_reserve(arr, arr->length + 1);
+
+    for (size_t i = arr->length; i > index; i--)
+    {
+        arr->items[i] = arr->items[i - 1];
+    }
+
+    load_fun(item, &arr->items[index]);
+    arr->length++;
+}
+
+void da_insert_array_at(da_t *arr, size_t index, void (*load_fun)(const void *, void **), size_t count, void *arr_items[])
+{
+    assert(arr != NULL);
+    assert(index <= arr->length);
+    assert(arr_items != NULL);
+    assert(count);
+
+    da_reserve(arr, arr->length + count + 1);
+
+    for (size_t i = arr->length + count - 1; i > index + count - 1; i--)
+    {
+        arr->items[i] = arr->items[i - count];
+    }
+
+    for (size_t i = 0; i < count; i++)
+    {
+        load_fun(arr_items[i], &arr->items[i + index]);
+    }
+    arr->length += count;
+}
+
+void da_insert_block_at(da_t *arr, size_t index, void (*load_fun)(const void *, void **), size_t count, ...)
+{
+    assert(arr != NULL);
+    assert(index <= arr->length);
+    assert(count);
+
+    va_list ap;
+    va_start(ap, count);
+
+    void *item;
+
+    da_reserve(arr, arr->length + count + 1);
+
+    for (size_t i = arr->length + count - 1; i > index + count - 1; i--)
+    {
+        arr->items[i] = arr->items[i - count];
+    }
 
     for (size_t i = 0; i < count; i++)
     {
         item = va_arg(ap, void *);
-        da_append(arr, item, load_fun);
+        load_fun(item, &arr->items[i + index]);
     }
+    arr->length += count;
 
     va_end(ap);
 }
